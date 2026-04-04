@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Premium Manifest</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #03071e;
+    --bg2:       #050d2e;
+    --surface:   #07122e;
+    --border:    rgba(79,195,247,0.12);
+    --blue:      #4fc3f7;
+    --blue-dim:  #1565c0;
+    --blue-glow: rgba(79,195,247,0.18);
+    --cyan:      #b3e5fc;
+    --text:      #e0f7fa;
+    --muted:     rgba(179,229,252,0.45);
+    --danger:    #ef5350;
+    --success:   #26c6da;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Animated background ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 50% 0%, rgba(21,101,192,0.22) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 30% at 80% 80%, rgba(79,195,247,0.08) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Canvas particles ── */
+  #canvas {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+  }
+
+  /* ── Layout ── */
+  .app {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Header ── */
+  header {
+    padding: 24px 20px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: rgba(3,7,30,0.7);
+  }
+
+  .logo {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .logo-top {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--blue);
+    opacity: 0.8;
+  }
+
+  .logo-main {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.08em;
+    color: var(--text);
+    line-height: 1;
+    text-shadow: 0 0 20px rgba(79,195,247,0.4);
+  }
+
+  .balance-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(79,195,247,0.08);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--blue);
+    transition: all 0.3s;
+  }
+
+  .balance-chip .coin { font-size: 15px; }
+
+  /* ── Main ── */
+  main {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* ── Section label ── */
+  .section-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--muted);
+    padding: 0 2px;
+  }
+
+  /* ── Search card ── */
+  .search-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .search-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--blue), transparent);
+    opacity: 0.6;
+  }
+
+  .search-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 14px;
+    color: var(--blue);
+    opacity: 0.6;
+    font-size: 16px;
+    pointer-events: none;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    background: rgba(79,195,247,0.05);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px 12px 40px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+  }
+
+  input[type="text"]::placeholder { color: var(--muted); }
+
+  input[type="text"]:focus {
+    border-color: rgba(79,195,247,0.5);
+    box-shadow: 0 0 0 3px rgba(79,195,247,0.07);
+  }
+
+  .btn-primary {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+    border: 1px solid rgba(79,195,247,0.3);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 4px 20px rgba(21,101,192,0.35);
+  }
+
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(79,195,247,0.15), transparent);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-primary:active::after { opacity: 1; }
+
+  .btn-primary:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* ── Status ── */
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: rgba(79,195,247,0.06);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 12px;
+    color: var(--muted);
+    min-height: 40px;
+    transition: all 0.3s;
+  }
+
+  .status-bar.error { border-color: rgba(239,83,80,0.3); color: #ef9a9a; background: rgba(239,83,80,0.06); }
+  .status-bar.success { border-color: rgba(38,198,218,0.3); color: #80deea; background: rgba(38,198,218,0.06); }
+  .status-bar.loading { border-color: rgba(79,195,247,0.25); color: var(--blue); }
+
+  .pulse-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--blue);
+    flex-shrink: 0;
+    animation: pulse 1.2s ease infinite;
+  }
+
+  .status-bar.error .pulse-dot { background: var(--danger); animation: none; }
+  .status-bar.success .pulse-dot { background: var(--success); animation: none; }
+
+  /* ── History ── */
+  .history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    animation: fadeUp 0.5s 0.1s ease both;
+  }
+
+  .history-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    transition: border-color 0.2s;
+    cursor: pointer;
+  }
+
+  .history-item:active { border-color: rgba(79,195,247,0.35); }
+
+  .history-info { flex: 1; min-width: 0; }
+
+  .history-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .history-meta {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 3px;
+    display: flex;
+    gap: 8px;
+  }
+
+  .history-cost {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 15px;
+    color: var(--blue);
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+  }
+
+  /* ── Profile card ── */
+  .profile-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .profile-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--blue), transparent);
+    opacity: 0.6;
+  }
+
+  .profile-avatar {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1565c0, #4fc3f7);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    color: #fff;
+    box-shadow: 0 0 20px rgba(79,195,247,0.25);
+    flex-shrink: 0;
+  }
+
+  .profile-top { display: flex; align-items: center; gap: 14px; }
+
+  .profile-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .profile-id {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .stat-box {
+    background: rgba(79,195,247,0.05);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .stat-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    color: var(--blue);
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+  }
+
+  /* ── Nav ── */
+  nav {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-top: 1px solid var(--border);
+    background: rgba(3,7,30,0.85);
+    backdrop-filter: blur(12px);
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+  }
+
+  .nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 12px 0 14px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    cursor: pointer;
+    transition: color 0.2s;
+    position: relative;
+  }
+
+  .nav-btn.active { color: var(--blue); }
+
+  .nav-btn.active::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 20%; right: 20%;
+    height: 1.5px;
+    background: var(--blue);
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 0 8px var(--blue);
+  }
+
+  .nav-icon { font-size: 20px; line-height: 1; }
+
+  /* ── Tab content ── */
+  .tab { display: none; }
+  .tab.active { display: flex; flex-direction: column; gap: 16px; }
+
+  /* ── Empty state ── */
+  .empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .empty-icon { font-size: 36px; margin-bottom: 10px; }
+
+  /* ── Loader spinner ── */
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(79,195,247,0.2);
+    border-top-color: var(--blue);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+
+  /* ── Keyframes ── */
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.75); }
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Search results dropdown */
+  .results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .result-item {
+    background: rgba(79,195,247,0.05);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .result-item:active {
+    border-color: rgba(79,195,247,0.4);
+    background: rgba(79,195,247,0.09);
+  }
+
+  .result-name { font-size: 13px; color: var(--text); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .result-id   { font-size: 11px; color: var(--blue); flex-shrink: 0; margin-left: 8px; }
+  .result-arr  { font-size: 14px; color: var(--muted); margin-left: 6px; }
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<div class="app">
+  <!-- Header -->
+  <header>
+    <div class="logo">
+      <span class="logo-top">STEAM</span>
+      <span class="logo-main">MANIFEST</span>
+    </div>
+    <div class="balance-chip">
+      <span class="coin">💎</span>
+      <span id="balance-val">—</span>
+    </div>
+  </header>
+
+  <!-- Main content -->
+  <main id="main-content">
+
+    <!-- TAB: Generate -->
+    <div class="tab active" id="tab-gen">
+      <div class="section-label">Генерация манифеста</div>
+
+      <div class="search-card">
+        <div class="search-input-wrap">
+          <span class="search-icon">⌕</span>
+          <input type="text" id="query-input" placeholder="AppID или название игры..."/>
+        </div>
+        <div id="results-wrap"></div>
+        <button class="btn-primary" id="gen-btn">ПОЛУЧИТЬ МАНИФЕСТ</button>
+      </div>
+
+      <div class="status-bar" id="status">
+        <div class="pulse-dot"></div>
+        <span id="status-text">Готов к работе</span>
+      </div>
+    </div>
+
+    <!-- TAB: History -->
+    <div class="tab" id="tab-history">
+      <div class="section-label">История генераций</div>
+      <div class="history-list" id="history-list">
+        <div class="empty">
+          <div class="empty-icon">📦</div>
+          Загрузка...
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Profile -->
+    <div class="tab" id="tab-profile">
+      <div class="section-label">Профиль</div>
+      <div class="profile-card">
+        <div class="profile-top">
+          <div class="profile-avatar" id="avatar-initials">?</div>
+          <div>
+            <div class="profile-name" id="profile-name">—</div>
+            <div class="profile-id" id="profile-id">ID: —</div>
+          </div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-label">Баланс</div>
+            <div class="stat-value" id="stat-balance">—</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Генераций</div>
+            <div class="stat-value" id="stat-gens">—</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Потрачено</div>
+            <div class="stat-value" id="stat-spent">—</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Статус</div>
+            <div class="stat-value" style="font-size:14px; padding-top:4px;" id="stat-status">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Nav -->
+  <nav>
+    <button class="nav-btn active" data-tab="gen">
+      <span class="nav-icon">📦</span>
+      <span>Генерация</span>
+    </button>
+    <button class="nav-btn" data-tab="history">
+      <span class="nav-icon">📜</span>
+      <span>История</span>
+    </button>
+    <button class="nav-btn" data-tab="profile">
+      <span class="nav-icon">👤</span>
+      <span>Профиль</span>
+    </button>
+  </nav>
+</div>
+
+<script>
+// ── Telegram WebApp init ──────────────────────────────────────────────
+const tg = window.Telegram?.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.setHeaderColor('#03071e');
+  tg.setBackgroundColor('#03071e');
+}
+
+const user = tg?.initDataUnsafe?.user || { id: 0, first_name: 'User', username: '' };
+
+// ── Canvas particles ──────────────────────────────────────────────────
+const canvas = document.getElementById('canvas');
+const ctx    = canvas.getContext('2d');
+let W, H, particles = [];
+
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+
+function mkParticle() {
+  return {
+    x:  Math.random() * W,
+    y:  Math.random() * H,
+    r:  Math.random() * 1.4 + 0.3,
+    vx: (Math.random() - 0.5) * 0.3,
+    vy: -Math.random() * 0.4 - 0.1,
+    a:  Math.random(),
+    da: (Math.random() - 0.5) * 0.008,
+    hue: Math.random() > 0.7 ? 200 : 210,
+  };
+}
+
+function initParticles() {
+  particles = Array.from({ length: 80 }, mkParticle);
+}
+
+function drawParticles() {
+  ctx.clearRect(0, 0, W, H);
+  for (const p of particles) {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(${p.hue}, 90%, 75%, ${Math.max(0, p.a)})`;
+    ctx.fill();
+
+    p.x  += p.vx;
+    p.y  += p.vy;
+    p.a  += p.da;
+
+    if (p.y < -5 || p.a < 0) Object.assign(p, mkParticle(), { y: H + 5 });
+  }
+  requestAnimationFrame(drawParticles);
+}
+
+window.addEventListener('resize', () => { resize(); initParticles(); });
+resize(); initParticles(); drawParticles();
+
+// ── Nav ───────────────────────────────────────────────────────────────
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    const tab = document.getElementById('tab-' + btn.dataset.tab);
+    tab.classList.add('active');
+    if (btn.dataset.tab === 'history') loadHistory();
+    if (btn.dataset.tab === 'profile') loadProfile();
+  });
+});
+
+// ── Status helper ─────────────────────────────────────────────────────
+function setStatus(msg, type = '') {
+  const bar  = document.getElementById('status');
+  const text = document.getElementById('status-text');
+  const dot  = bar.querySelector('.pulse-dot');
+  bar.className = 'status-bar ' + type;
+
+  if (type === 'loading') {
+    dot.outerHTML = '<div class="spinner"></div>';
+  } else if (!bar.querySelector('.pulse-dot')) {
+    bar.querySelector('.spinner')?.remove();
+    bar.insertAdjacentHTML('afterbegin', '<div class="pulse-dot"></div>');
+  }
+  text.textContent = msg;
+}
+
+// ── Search ────────────────────────────────────────────────────────────
+let searchTimeout;
+const queryInput  = document.getElementById('query-input');
+const resultsWrap = document.getElementById('results-wrap');
+let selectedAppId = null;
+
+queryInput.addEventListener('input', () => {
+  clearTimeout(searchTimeout);
+  selectedAppId = null;
+  const q = queryInput.value.trim();
+
+  if (!q) { resultsWrap.innerHTML = ''; return; }
+  if (/^\d+$/.test(q)) { resultsWrap.innerHTML = ''; return; } // raw appid — no search
+
+  searchTimeout = setTimeout(() => doSearch(q), 500);
+});
+
+async function doSearch(q) {
+  resultsWrap.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:4px 2px">🔍 Поиск...</div>';
+  try {
+    const r    = await fetch(`https://store.steampowered.com/api/storesearch/?term=${encodeURIComponent(q)}&l=russian&cc=RU`);
+    const data = await r.json();
+    const items = (data.items || []).slice(0, 5);
+
+    if (!items.length) {
+      resultsWrap.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:4px 2px">Ничего не найдено</div>';
+      return;
+    }
+
+    resultsWrap.innerHTML = `
+      <div class="results-list">
+        ${items.map(it => `
+          <div class="result-item" data-id="${it.id}" data-name="${it.name.replace(/"/g,"'")}">
+            <span class="result-name">${it.name}</span>
+            <span class="result-id">${it.id}</span>
+            <span class="result-arr">›</span>
+          </div>
+        `).join('')}
+      </div>`;
+
+    resultsWrap.querySelectorAll('.result-item').forEach(el => {
+      el.addEventListener('click', () => {
+        selectedAppId = el.dataset.id;
+        queryInput.value = el.dataset.name;
+        resultsWrap.innerHTML = '';
+        tg?.HapticFeedback?.selectionChanged();
+      });
+    });
+  } catch {
+    resultsWrap.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:4px 2px">Ошибка поиска</div>';
+  }
+}
+
+// ── Generate ──────────────────────────────────────────────────────────
+document.getElementById('gen-btn').addEventListener('click', async () => {
+  const q     = queryInput.value.trim();
+  const appid = selectedAppId || (/^\d+$/.test(q) ? q : null);
+
+  if (!appid) {
+    setStatus('Выбери игру из списка или введи AppID', 'error');
+    tg?.HapticFeedback?.notificationOccurred('error');
+    return;
+  }
+
+  setStatus('Запрашиваю манифест...', 'loading');
+  document.getElementById('gen-btn').disabled = true;
+
+  // Tell the bot via sendData — bot handles the real generation
+  tg?.sendData(JSON.stringify({ action: 'generate', appid }));
+
+  // Simulate response feedback (real result comes via bot message)
+  setTimeout(() => {
+    setStatus('Запрос отправлен! Манифест придёт в чат 📦', 'success');
+    document.getElementById('gen-btn').disabled = false;
+    tg?.HapticFeedback?.notificationOccurred('success');
+    queryInput.value = '';
+    selectedAppId = null;
+  }, 800);
+});
+
+// ── History (pulls from Telegram bot via initData) ────────────────────
+async function loadHistory() {
+  const list = document.getElementById('history-list');
+  list.innerHTML = '<div class="empty"><div class="empty-icon">⏳</div>Загрузка...</div>';
+
+  // In real deployment the bot endpoint returns history JSON.
+  // Here we show placeholder since there's no backend URL yet.
+  await new Promise(r => setTimeout(r, 600));
+  list.innerHTML = `
+    <div class="empty">
+      <div class="empty-icon">📦</div>
+      История загружается через бот.<br>Нажми «📜 История» в меню.
+    </div>`;
+}
+
+// ── Profile ───────────────────────────────────────────────────────────
+function loadProfile() {
+  const name = [user.first_name, user.last_name].filter(Boolean).join(' ') || 'User';
+  const initials = name.slice(0, 2).toUpperCase();
+
+  document.getElementById('profile-name').textContent = name;
+  document.getElementById('profile-id').textContent   = 'ID: ' + (user.id || '—');
+  document.getElementById('avatar-initials').textContent = initials;
+  document.getElementById('stat-status').textContent  = '✅ Активен';
+
+  // Balance comes from header chip
+  const bal = document.getElementById('balance-val').textContent;
+  document.getElementById('stat-balance').textContent = bal !== '—' ? bal : '…';
+  document.getElementById('stat-gens').textContent    = '—';
+  document.getElementById('stat-spent').textContent   = '—';
+}
+
+// ── Set balance from bot (via tg.initData or inline query) ────────────
+// The bot should open the webapp with startParam=balance:<coins>
+const startParam = tg?.initDataUnsafe?.start_param || '';
+if (startParam.startsWith('bal_')) {
+  document.getElementById('balance-val').textContent = startParam.replace('bal_', '');
+}
+</script>
+</body>
+</html>
