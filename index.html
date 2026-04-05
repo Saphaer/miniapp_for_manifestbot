@@ -227,7 +227,7 @@
       <div class="section-label">Профиль</div>
       <div class="card" id="profile-card">
         <div class="profile-top">
-          <div class="profile-avatar" id="avatar-initials">…</div>
+          <div class="profile-avatar" id="avatar-initials">   <img id="avatar-img" src="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:none;"/>   <span id="avatar-text">…</span> </div>
           <div>
             <div class="profile-name" id="profile-name">Загрузка…</div>
             <div class="profile-id"  id="profile-id"></div>
@@ -454,10 +454,19 @@ async function loadProfile() {
   try {
     const data = await apiFetch('/api/profile');
 
-    const name     = data.full_name || data.username || tgUser.first_name || 'User';
-    const initials = name.slice(0,2).toUpperCase();
-
-    document.getElementById('avatar-initials').textContent = initials;
+const initials = name.slice(0,2).toUpperCase();
+document.getElementById('avatar-text').textContent = initials;
+const avatarImg = document.getElementById('avatar-img');
+const avatarUrl = `${API_BASE}/api/avatar?init_data=${encodeURIComponent(initData)}`;
+avatarImg.src = avatarUrl;
+avatarImg.onload = () => {
+  avatarImg.style.display = 'block';
+  document.getElementById('avatar-text').style.display = 'none';
+};
+avatarImg.onerror = () => {
+  avatarImg.style.display = 'none';
+  document.getElementById('avatar-text').style.display = '';
+};
     document.getElementById('profile-name').textContent    = name;
     document.getElementById('profile-id').textContent      = 'ID: ' + data.user_id;
     document.getElementById('stat-balance').textContent    = data.balance;
