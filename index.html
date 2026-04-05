@@ -276,9 +276,8 @@ const tgUser = tg?.initDataUnsafe?.user || {};
 
 // ── API helper ────────────────────────────────────────────────────────
 async function apiFetch(path) {
-  const r = await fetch(API_BASE + path, {
-    headers: { 'X-Init-Data': initData }
-  });
+  const sep = path.includes('?') ? '&' : '?';
+  const r = await fetch(`${API_BASE}${path}${sep}init_data=${encodeURIComponent(initData)}`);
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
   return r.json();
 }
