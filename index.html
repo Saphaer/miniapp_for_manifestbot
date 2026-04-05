@@ -8,140 +8,64 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:        #03071e;
-    --bg2:       #050d2e;
-    --surface:   #07122e;
-    --border:    rgba(79,195,247,0.12);
-    --blue:      #4fc3f7;
-    --blue-dim:  #1565c0;
-    --blue-glow: rgba(79,195,247,0.18);
-    --cyan:      #b3e5fc;
-    --text:      #e0f7fa;
-    --muted:     rgba(179,229,252,0.45);
-    --danger:    #ef5350;
-    --success:   #26c6da;
+    --bg:      #03071e;
+    --surface: #07122e;
+    --border:  rgba(79,195,247,0.12);
+    --blue:    #4fc3f7;
+    --text:    #e0f7fa;
+    --muted:   rgba(179,229,252,0.45);
+    --danger:  #ef5350;
+    --success: #26c6da;
   }
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html, body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+  html, body { background:var(--bg); color:var(--text); font-family:'DM Mono',monospace; min-height:100vh; overflow-x:hidden; }
   body::before {
-    content: '';
-    position: fixed; inset: 0;
-    background:
-      radial-gradient(ellipse 60% 40% at 50% 0%, rgba(21,101,192,0.22) 0%, transparent 70%),
-      radial-gradient(ellipse 40% 30% at 80% 80%, rgba(79,195,247,0.08) 0%, transparent 60%);
-    pointer-events: none; z-index: 0;
+    content:''; position:fixed; inset:0;
+    background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(21,101,192,.22) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 30% at 80% 80%, rgba(79,195,247,.08) 0%, transparent 60%);
+    pointer-events:none; z-index:0;
   }
-  #canvas { position:fixed; inset:0; pointer-events:none; z-index:0; opacity:0.6; }
+  #canvas { position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.6; }
   .app { position:relative; z-index:1; min-height:100vh; display:flex; flex-direction:column; }
 
-  /* Header */
   header {
-    padding: 20px 20px 14px;
-    display: flex; align-items: center; justify-content: space-between;
-    border-bottom: 1px solid var(--border);
-    backdrop-filter: blur(12px);
-    position: sticky; top: 0; z-index: 10;
-    background: rgba(3,7,30,0.75);
+    padding:20px 20px 14px; display:flex; align-items:center; justify-content:space-between;
+    border-bottom:1px solid var(--border); backdrop-filter:blur(12px);
+    position:sticky; top:0; z-index:10; background:rgba(3,7,30,.75);
   }
   .logo-top  { font-family:'Bebas Neue',sans-serif; font-size:10px; letter-spacing:.3em; color:var(--blue); opacity:.8; }
   .logo-main { font-family:'Bebas Neue',sans-serif; font-size:21px; letter-spacing:.08em; color:var(--text); line-height:1; text-shadow:0 0 20px rgba(79,195,247,.4); }
-  .balance-chip {
-    display:flex; align-items:center; gap:6px;
-    background:rgba(79,195,247,.08); border:1px solid var(--border);
-    border-radius:20px; padding:6px 14px; font-size:13px; color:var(--blue);
-    transition: all .3s;
-  }
+  .balance-chip { display:flex; align-items:center; gap:6px; background:rgba(79,195,247,.08); border:1px solid var(--border); border-radius:20px; padding:6px 14px; font-size:13px; color:var(--blue); }
 
-  /* Main */
   main { flex:1; padding:18px; display:flex; flex-direction:column; gap:14px; }
   .section-label { font-family:'Bebas Neue',sans-serif; font-size:11px; letter-spacing:.3em; color:var(--muted); }
 
-  /* Cards */
   .card {
     background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:18px;
     display:flex; flex-direction:column; gap:12px;
     position:relative; overflow:hidden; animation:fadeUp .4s ease both;
   }
-  .card::before {
-    content:''; position:absolute; top:0; left:0; right:0; height:1px;
-    background:linear-gradient(90deg,transparent,var(--blue),transparent); opacity:.5;
-  }
-
-  /* Input */
-  .search-wrap { position:relative; display:flex; align-items:center; }
-  .search-icon { position:absolute; left:13px; color:var(--blue); opacity:.6; font-size:15px; pointer-events:none; }
-  input[type=text] {
-    width:100%; background:rgba(79,195,247,.05); border:1px solid var(--border);
-    border-radius:10px; padding:12px 12px 12px 38px;
-    color:var(--text); font-family:'DM Mono',monospace; font-size:14px;
-    outline:none; transition:border-color .2s, box-shadow .2s; -webkit-appearance:none;
-  }
-  input[type=text]::placeholder { color:var(--muted); }
-  input[type=text]:focus { border-color:rgba(79,195,247,.5); box-shadow:0 0 0 3px rgba(79,195,247,.07); }
-
-  /* Buttons */
-  .btn-primary {
-    width:100%; padding:13px; background:linear-gradient(135deg,#1565c0,#0d47a1);
-    border:1px solid rgba(79,195,247,.3); border-radius:10px;
-    color:var(--text); font-family:'Bebas Neue',sans-serif; font-size:16px;
-    letter-spacing:.1em; cursor:pointer; position:relative; overflow:hidden;
-    transition:transform .15s, box-shadow .15s;
-    box-shadow:0 4px 20px rgba(21,101,192,.35);
-  }
-  .btn-primary:active { transform:scale(.98); }
-  .btn-primary:disabled { opacity:.4; cursor:not-allowed; transform:none; }
-
-  /* Status bar */
-  .status-bar {
-    display:flex; align-items:center; gap:8px; padding:10px 13px;
-    background:rgba(79,195,247,.05); border:1px solid var(--border);
-    border-radius:10px; font-size:12px; color:var(--muted); min-height:38px;
-    transition:all .3s;
-  }
-  .status-bar.error   { border-color:rgba(239,83,80,.3); color:#ef9a9a; background:rgba(239,83,80,.06); }
-  .status-bar.success { border-color:rgba(38,198,218,.3); color:#80deea; background:rgba(38,198,218,.06); }
-  .status-bar.loading { border-color:rgba(79,195,247,.25); color:var(--blue); }
-  .pulse-dot { width:7px; height:7px; border-radius:50%; background:var(--blue); flex-shrink:0; animation:pulse 1.2s ease infinite; }
-  .status-bar.error .pulse-dot   { background:var(--danger); animation:none; }
-  .status-bar.success .pulse-dot { background:var(--success); animation:none; }
-  .spinner { width:15px; height:15px; border:2px solid rgba(79,195,247,.2); border-top-color:var(--blue); border-radius:50%; animation:spin .7s linear infinite; flex-shrink:0; }
-
-  /* Results */
-  .results-list { display:flex; flex-direction:column; gap:7px; }
-  .result-item {
-    background:rgba(79,195,247,.05); border:1px solid var(--border);
-    border-radius:9px; padding:10px 13px;
-    display:flex; align-items:center; gap:8px; cursor:pointer;
-    transition:border-color .2s, background .2s;
-  }
-  .result-item:active { border-color:rgba(79,195,247,.4); background:rgba(79,195,247,.09); }
-  .result-name { font-size:13px; color:var(--text); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .result-id   { font-size:11px; color:var(--blue); flex-shrink:0; }
+  .card::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,var(--blue),transparent); opacity:.5; }
 
   /* History */
-  .history-list { display:flex; flex-direction:column; gap:9px; animation:fadeUp .4s .1s ease both; }
+  .history-list { display:flex; flex-direction:column; gap:9px; }
   .history-item {
     background:var(--surface); border:1px solid var(--border); border-radius:12px;
     padding:12px 15px; display:flex; align-items:center; justify-content:space-between; gap:10px;
+    animation:fadeUp .35s ease both;
   }
-  .history-name { font-family:'Syne',sans-serif; font-size:13px; font-weight:600; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .history-name { font-family:'Syne',sans-serif; font-size:13px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .history-meta { font-size:11px; color:var(--muted); margin-top:2px; }
   .history-cost { font-family:'Bebas Neue',sans-serif; font-size:15px; color:var(--blue); flex-shrink:0; }
 
   /* Profile */
-  .profile-top   { display:flex; align-items:center; gap:13px; }
+  .profile-top { display:flex; align-items:center; gap:13px; }
   .profile-avatar {
     width:52px; height:52px; border-radius:50%;
     background:linear-gradient(135deg,#1565c0,#4fc3f7);
     display:flex; align-items:center; justify-content:center;
     font-family:'Bebas Neue',sans-serif; font-size:20px; color:#fff;
-    box-shadow:0 0 20px rgba(79,195,247,.25); flex-shrink:0;
+    box-shadow:0 0 20px rgba(79,195,247,.25); flex-shrink:0; overflow:hidden;
   }
   .profile-name { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; }
   .profile-id   { font-size:11px; color:var(--muted); margin-top:2px; }
@@ -150,37 +74,52 @@
   .stat-label { font-size:10px; color:var(--muted); letter-spacing:.08em; text-transform:uppercase; }
   .stat-value { font-family:'Bebas Neue',sans-serif; font-size:22px; color:var(--blue); letter-spacing:.05em; margin-top:1px; }
 
-  /* Empty */
+  /* Top-up */
+  .method-tabs { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .method-tab {
+    padding:10px 8px; border:1px solid var(--border); border-radius:10px;
+    background:rgba(79,195,247,.05); cursor:pointer; text-align:center;
+    font-size:12px; color:var(--muted); transition:all .2s;
+  }
+  .method-tab.active { border-color:rgba(79,195,247,.5); color:var(--blue); background:rgba(79,195,247,.1); }
+  .method-tab-icon { font-size:20px; display:block; margin-bottom:4px; }
+
+  .pkg-btn {
+    background:rgba(79,195,247,.05); border:1px solid var(--border); border-radius:10px;
+    padding:13px 15px; cursor:pointer; transition:border-color .2s, background .2s;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .pkg-btn:active { border-color:rgba(79,195,247,.45); background:rgba(79,195,247,.1); }
+  .pkg-name  { font-family:'Syne',sans-serif; font-size:13px; font-weight:600; }
+  .pkg-coins { font-size:11px; color:var(--muted); margin-top:2px; }
+  .pkg-price { font-family:'Bebas Neue',sans-serif; font-size:17px; color:var(--blue); letter-spacing:.05em; }
+
+  /* Empty / spinner */
   .empty { text-align:center; padding:36px 16px; color:var(--muted); font-size:13px; }
   .empty-icon { font-size:34px; margin-bottom:8px; }
+  .spinner { width:22px; height:22px; border:2px solid rgba(79,195,247,.2); border-top-color:var(--blue); border-radius:50%; animation:spin .7s linear infinite; margin:0 auto 10px; }
 
   /* Nav */
   nav {
-    display:grid; grid-template-columns:repeat(3,1fr);
+    display:grid; grid-template-columns:1fr 1fr;
     border-top:1px solid var(--border);
     background:rgba(3,7,30,.88); backdrop-filter:blur(12px);
     position:sticky; bottom:0; z-index:10;
   }
   .nav-btn {
     display:flex; flex-direction:column; align-items:center; justify-content:center;
-    gap:3px; padding:11px 0 13px;
-    background:none; border:none; color:var(--muted);
-    font-family:'DM Mono',monospace; font-size:10px; cursor:pointer;
-    transition:color .2s; position:relative;
+    gap:3px; padding:11px 0 13px; background:none; border:none; color:var(--muted);
+    font-family:'DM Mono',monospace; font-size:10px; cursor:pointer; transition:color .2s; position:relative;
   }
   .nav-btn.active { color:var(--blue); }
   .nav-btn.active::before {
     content:''; position:absolute; top:0; left:20%; right:20%;
-    height:1.5px; background:var(--blue); border-radius:0 0 4px 4px;
-    box-shadow:0 0 8px var(--blue);
+    height:1.5px; background:var(--blue); border-radius:0 0 4px 4px; box-shadow:0 0 8px var(--blue);
   }
   .nav-icon { font-size:19px; line-height:1; }
-
-  /* Tabs */
   .tab { display:none; }
   .tab.active { display:flex; flex-direction:column; gap:14px; }
 
-  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.75)} }
   @keyframes spin   { to{transform:rotate(360deg)} }
   @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
 </style>
@@ -196,38 +135,24 @@
     <div class="balance-chip">💎 <span id="balance-val">…</span></div>
   </header>
 
-  <main id="main-content">
-    <!-- Generate -->
-    <div class="tab active" id="tab-gen">
-      <div class="section-label">Генерация манифеста</div>
-      <div class="card">
-        <div class="search-wrap">
-          <span class="search-icon">⌕</span>
-          <input type="text" id="query-input" placeholder="AppID или название игры…"/>
-        </div>
-        <div id="results-wrap"></div>
-        <button class="btn-primary" id="gen-btn">ПОЛУЧИТЬ МАНИФЕСТ</button>
-      </div>
-      <div class="status-bar" id="status">
-        <div class="pulse-dot"></div>
-        <span id="status-text">Готов к работе</span>
-      </div>
-    </div>
-
-    <!-- History -->
-    <div class="tab" id="tab-history">
+  <main>
+    <!-- History tab -->
+    <div class="tab active" id="tab-history">
       <div class="section-label">История генераций</div>
       <div class="history-list" id="history-list">
-        <div class="empty"><div class="empty-icon">⏳</div>Загрузка…</div>
+        <div class="empty"><div class="spinner"></div>Загрузка…</div>
       </div>
     </div>
 
-    <!-- Profile -->
+    <!-- Profile tab -->
     <div class="tab" id="tab-profile">
       <div class="section-label">Профиль</div>
-      <div class="card" id="profile-card">
+      <div class="card">
         <div class="profile-top">
-          <div class="profile-avatar" id="avatar-initials">   <img id="avatar-img" src="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:none;"/>   <span id="avatar-text">…</span> </div>
+          <div class="profile-avatar">
+            <img id="avatar-img" src="" style="width:100%;height:100%;object-fit:cover;display:none;"/>
+            <span id="avatar-text">…</span>
+          </div>
           <div>
             <div class="profile-name" id="profile-name">Загрузка…</div>
             <div class="profile-id"  id="profile-id"></div>
@@ -240,14 +165,24 @@
           <div class="stat-box"><div class="stat-label">Статус</div><div class="stat-value" style="font-size:13px;padding-top:5px" id="stat-status">—</div></div>
         </div>
       </div>
+
+      <div class="section-label">Пополнение баланса</div>
+      <div class="card">
+        <div class="method-tabs">
+          <div class="method-tab active" data-method="crypto" onclick="selectMethod('crypto')">
+            <span class="method-tab-icon">🤖</span>CryptoBot
+          </div>
+          <div class="method-tab" data-method="stars" onclick="selectMethod('stars')">
+            <span class="method-tab-icon">⭐</span>Stars
+          </div>
+        </div>
+        <div id="packages-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+      </div>
     </div>
   </main>
 
   <nav>
-    <button class="nav-btn active" data-tab="gen">
-      <span class="nav-icon">📦</span><span>Генерация</span>
-    </button>
-    <button class="nav-btn" data-tab="history">
+    <button class="nav-btn active" data-tab="history">
       <span class="nav-icon">📜</span><span>История</span>
     </button>
     <button class="nav-btn" data-tab="profile">
@@ -257,24 +192,20 @@
 </div>
 
 <script>
-// ── Config ────────────────────────────────────────────────────────────
-// Set this to your Cloudflare Tunnel URL where bot.py API is running
 const API_BASE = 'https://api.saphaer.indevs.in';
-
-// ── Telegram WebApp ───────────────────────────────────────────────────
 const tg       = window.Telegram?.WebApp;
 const initData = tg?.initData || '';
-
-if (tg) {
-  tg.ready();
-  tg.expand();
-  tg.setHeaderColor('#03071e');
-  tg.setBackgroundColor('#03071e');
-}
-
+if (tg) { tg.ready(); tg.expand(); tg.setHeaderColor('#03071e'); tg.setBackgroundColor('#03071e'); }
 const tgUser = tg?.initDataUnsafe?.user || {};
 
-// ── API helper ────────────────────────────────────────────────────────
+const PACKAGES = [
+  { id:'starter',  name:'Стартовый',   coins:100,  usdt:1, stars:100 },
+  { id:'advanced', name:'Продвинутый', coins:500,  usdt:4, stars:400 },
+  { id:'premium',  name:'Премиум',     coins:1000, usdt:7, stars:700 },
+];
+let currentMethod = 'crypto';
+
+// ── API ───────────────────────────────────────────────────────────────
 async function apiFetch(path) {
   const sep = path.includes('?') ? '&' : '?';
   const r = await fetch(`${API_BASE}${path}${sep}init_data=${encodeURIComponent(initData)}`);
@@ -284,45 +215,23 @@ async function apiFetch(path) {
 
 // ── Particles ─────────────────────────────────────────────────────────
 const canvas = document.getElementById('canvas');
-const ctx    = canvas.getContext('2d');
+const ctx = canvas.getContext('2d');
 let W, H, particles = [];
-
 function resize() { W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
-function mkP() {
-  return { x:Math.random()*W, y:Math.random()*H, r:Math.random()*1.3+.3,
-           vx:(Math.random()-.5)*.3, vy:-Math.random()*.4-.1,
-           a:Math.random(), da:(Math.random()-.5)*.008 };
-}
+function mkP() { return { x:Math.random()*W, y:Math.random()*H, r:Math.random()*1.3+.3, vx:(Math.random()-.5)*.3, vy:-Math.random()*.4-.1, a:Math.random(), da:(Math.random()-.5)*.008 }; }
 function initP() { particles = Array.from({length:70}, mkP); }
 function drawP() {
   ctx.clearRect(0,0,W,H);
   for (const p of particles) {
-    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-    ctx.fillStyle = `hsla(205,90%,75%,${Math.max(0,p.a)})`; ctx.fill();
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle=`hsla(205,90%,75%,${Math.max(0,p.a)})`; ctx.fill();
     p.x+=p.vx; p.y+=p.vy; p.a+=p.da;
-    if (p.y<-5||p.a<0) Object.assign(p, mkP(), {y:H+5});
+    if(p.y<-5||p.a<0) Object.assign(p,mkP(),{y:H+5});
   }
   requestAnimationFrame(drawP);
 }
-addEventListener('resize', ()=>{ resize(); initP(); });
+addEventListener('resize',()=>{resize();initP();});
 resize(); initP(); drawP();
-
-// ── Status ────────────────────────────────────────────────────────────
-function setStatus(msg, type='') {
-  const bar  = document.getElementById('status');
-  const text = document.getElementById('status-text');
-  bar.className = 'status-bar ' + type;
-  bar.innerHTML = '';
-  if (type === 'loading') {
-    bar.insertAdjacentHTML('afterbegin', '<div class="spinner"></div>');
-  } else {
-    bar.insertAdjacentHTML('afterbegin', '<div class="pulse-dot"></div>');
-  }
-  const span = document.createElement('span');
-  span.id = 'status-text';
-  span.textContent = msg;
-  bar.appendChild(span);
-}
 
 // ── Nav ───────────────────────────────────────────────────────────────
 document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -330,104 +239,42 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
-    const id = 'tab-' + btn.dataset.tab;
-    document.getElementById(id).classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
     if (btn.dataset.tab === 'history') loadHistory();
     if (btn.dataset.tab === 'profile') loadProfile();
   });
 });
 
-// ── Search ────────────────────────────────────────────────────────────
-let searchTimer, selectedAppId = null;
-const queryInput  = document.getElementById('query-input');
-const resultsWrap = document.getElementById('results-wrap');
-
-queryInput.addEventListener('input', () => {
-  clearTimeout(searchTimer);
-  selectedAppId = null;
-  const q = queryInput.value.trim();
-  if (!q) { resultsWrap.innerHTML = ''; return; }
-  if (/^\d+$/.test(q)) { resultsWrap.innerHTML = ''; return; }
-  searchTimer = setTimeout(() => doSearch(q), 500);
-});
-
-async function doSearch(q) {
-  resultsWrap.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:3px 2px">🔍 Поиск…</div>';
-  try {
-    const r    = await fetch(`https://store.steampowered.com/api/storesearch/?term=${encodeURIComponent(q)}&l=russian&cc=RU`);
-    const data = await r.json();
-    const items = (data.items || []).slice(0, 5);
-    if (!items.length) {
-      resultsWrap.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:3px 2px">Ничего не найдено</div>';
-      return;
-    }
-    resultsWrap.innerHTML = `<div class="results-list">${items.map(it =>
-      `<div class="result-item" data-id="${it.id}" data-name="${it.name.replace(/"/g,"'")}">
-        <span class="result-name">${it.name}</span>
-        <span class="result-id">${it.id}</span>
-       </div>`
-    ).join('')}</div>`;
-    resultsWrap.querySelectorAll('.result-item').forEach(el => {
-      el.addEventListener('click', () => {
-        selectedAppId   = el.dataset.id;
-        queryInput.value = el.dataset.name;
-        resultsWrap.innerHTML = '';
-        tg?.HapticFeedback?.selectionChanged();
-      });
-    });
-  } catch {
-    resultsWrap.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:3px 2px">Ошибка поиска</div>';
-  }
+// ── Top-up ────────────────────────────────────────────────────────────
+function selectMethod(method) {
+  currentMethod = method;
+  document.querySelectorAll('.method-tab').forEach(t => t.classList.toggle('active', t.dataset.method === method));
+  renderPackages();
 }
 
-// ── Generate ──────────────────────────────────────────────────────────
-document.getElementById('gen-btn').addEventListener('click', async () => {
-  const q     = queryInput.value.trim();
-  const appid = selectedAppId || (/^\d+$/.test(q) ? q : null);
+function renderPackages() {
+  document.getElementById('packages-list').innerHTML = PACKAGES.map(pkg => {
+    const price = currentMethod === 'crypto' ? `${pkg.usdt} USDT` : `${pkg.stars} ⭐`;
+    return `<div class="pkg-btn" onclick="buyPackage('${pkg.id}')">
+      <div>
+        <div class="pkg-name">${pkg.name}</div>
+        <div class="pkg-coins">💎 ${pkg.coins} монет</div>
+      </div>
+      <div class="pkg-price">${price}</div>
+    </div>`;
+  }).join('');
+}
 
-  if (!appid) {
-    setStatus('Выбери игру из списка или введи AppID цифрами', 'error');
-    tg?.HapticFeedback?.notificationOccurred('error');
-    return;
-  }
-
-  // Validate appid exists on Steam
-  setStatus('Проверяю игру в Steam…', 'loading');
-  document.getElementById('gen-btn').disabled = true;
-
-  try {
-    const r = await fetch(`https://store.steampowered.com/api/appdetails/?appids=${appid}&filters=basic_info`);
-    const d = await r.json();
-    if (!d[appid]?.success) {
-      setStatus(`AppID ${appid} не найден в Steam`, 'error');
-      tg?.HapticFeedback?.notificationOccurred('error');
-      document.getElementById('gen-btn').disabled = false;
-      return;
-    }
-    const gameName = d[appid]?.data?.name || `App ${appid}`;
-    setStatus(`Запрашиваю манифест для "${gameName}"…`, 'loading');
-  } catch {
-    // Steam check failed — continue anyway, bot will validate
-    setStatus('Отправляю запрос…', 'loading');
-  }
-
-  // Send to bot via sendData
-  tg?.sendData(JSON.stringify({ action: 'generate', appid }));
-
-  setTimeout(() => {
-    setStatus('✅ Запрос отправлен — манифест придёт в чат!', 'success');
-    document.getElementById('gen-btn').disabled = false;
-    tg?.HapticFeedback?.notificationOccurred('success');
-    queryInput.value = '';
-    selectedAppId = null;
-    resultsWrap.innerHTML = '';
-  }, 700);
-});
+function buyPackage(pid) {
+  tg?.HapticFeedback?.selectionChanged();
+  tg?.sendData(JSON.stringify({ action:'topup', method:currentMethod, package:pid }));
+  tg?.close();
+}
 
 // ── History ───────────────────────────────────────────────────────────
 async function loadHistory() {
   const list = document.getElementById('history-list');
-  list.innerHTML = '<div class="empty"><div class="empty-icon">⏳</div>Загрузка…</div>';
+  list.innerHTML = '<div class="empty"><div class="spinner"></div>Загрузка…</div>';
   try {
     const data = await apiFetch('/api/history');
     if (!data.items?.length) {
@@ -435,17 +282,17 @@ async function loadHistory() {
       return;
     }
     list.innerHTML = data.items.map(item => {
-      const date = (item.timestamp || '').slice(0, 10);
+      const date = (item.timestamp||'').slice(0,10);
       return `<div class="history-item">
         <div style="flex:1;min-width:0">
-          <div class="history-name">${item.game_name || item.appid}</div>
+          <div class="history-name">${item.game_name||item.appid}</div>
           <div class="history-meta">AppID ${item.appid} · ${date}</div>
         </div>
         <div class="history-cost">${item.cost}🪙</div>
       </div>`;
     }).join('');
-  } catch (e) {
-    list.innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div>Ошибка загрузки истории.<br><small style="opacity:.6">${e.message}</small></div>`;
+  } catch(e) {
+    list.innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div>Ошибка загрузки.<br><small style="opacity:.6">${e.message}</small></div>`;
   }
 }
 
@@ -453,46 +300,35 @@ async function loadHistory() {
 async function loadProfile() {
   try {
     const data = await apiFetch('/api/profile');
+    const name = data.full_name || data.username || tgUser.first_name || 'User';
+    document.getElementById('avatar-text').textContent  = name.slice(0,2).toUpperCase();
+    document.getElementById('profile-name').textContent = name;
+    document.getElementById('profile-id').textContent   = 'ID: ' + data.user_id;
+    document.getElementById('stat-balance').textContent = data.balance;
+    document.getElementById('stat-gens').textContent    = data.total_gens;
+    document.getElementById('stat-spent').textContent   = data.total_spent;
+    document.getElementById('stat-status').textContent  = data.is_banned ? '🚫 Забанен' : '✅ Активен';
+    document.getElementById('balance-val').textContent  = data.balance;
 
-const initials = name.slice(0,2).toUpperCase();
-document.getElementById('avatar-text').textContent = initials;
-const avatarImg = document.getElementById('avatar-img');
-const avatarUrl = `${API_BASE}/api/avatar?init_data=${encodeURIComponent(initData)}`;
-avatarImg.src = avatarUrl;
-avatarImg.onload = () => {
-  avatarImg.style.display = 'block';
-  document.getElementById('avatar-text').style.display = 'none';
-};
-avatarImg.onerror = () => {
-  avatarImg.style.display = 'none';
-  document.getElementById('avatar-text').style.display = '';
-};
-    document.getElementById('profile-name').textContent    = name;
-    document.getElementById('profile-id').textContent      = 'ID: ' + data.user_id;
-    document.getElementById('stat-balance').textContent    = data.balance;
-    document.getElementById('stat-gens').textContent       = data.total_gens;
-    document.getElementById('stat-spent').textContent      = data.total_spent;
-    document.getElementById('stat-status').textContent     = data.is_banned ? '🚫 Забанен' : '✅ Активен';
-
-    // Update header balance chip
-    document.getElementById('balance-val').textContent = data.balance;
-  } catch (e) {
+    const img = document.getElementById('avatar-img');
+    img.src = `${API_BASE}/api/avatar?init_data=${encodeURIComponent(initData)}`;
+    img.onload  = () => { img.style.display='block'; document.getElementById('avatar-text').style.display='none'; };
+    img.onerror = () => { img.style.display='none';  document.getElementById('avatar-text').style.display=''; };
+  } catch(e) {
     document.getElementById('profile-name').textContent = tgUser.first_name || 'User';
-    document.getElementById('profile-id').textContent   = 'ID: ' + (tgUser.id || '—');
+    document.getElementById('profile-id').textContent   = 'ID: ' + (tgUser.id||'—');
     document.getElementById('stat-status').textContent  = '⚠️ Нет API';
-    console.error('Profile load error:', e);
   }
 }
 
 // ── Init ──────────────────────────────────────────────────────────────
+renderPackages();
+loadHistory();
 (async () => {
-  // Load balance on startup for the chip
   try {
-    const data = await apiFetch('/api/profile');
-    document.getElementById('balance-val').textContent = data.balance;
-  } catch {
-    document.getElementById('balance-val').textContent = '—';
-  }
+    const d = await apiFetch('/api/profile');
+    document.getElementById('balance-val').textContent = d.balance;
+  } catch { document.getElementById('balance-val').textContent = '—'; }
 })();
 </script>
 </body>
