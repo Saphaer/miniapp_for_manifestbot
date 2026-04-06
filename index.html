@@ -37,7 +37,7 @@
   .logo-main { font-family:'Bebas Neue',sans-serif; font-size:21px; letter-spacing:.08em; color:var(--text); line-height:1; text-shadow:0 0 20px rgba(79,195,247,.4); }
   .balance-chip { display:flex; align-items:center; gap:6px; background:rgba(79,195,247,.08); border:1px solid var(--border); border-radius:20px; padding:6px 14px; font-size:13px; color:var(--blue); }
 
-  main { flex:1; padding:18px; display:flex; flex-direction:column; gap:14px; }
+  main { flex:1; padding:18px; display:flex; flex-direction:column; gap:14px; padding-bottom:80px; }
   .section-label { font-family:'Bebas Neue',sans-serif; font-size:11px; letter-spacing:.3em; color:var(--muted); }
 
   .card {
@@ -52,7 +52,7 @@
   .history-item {
     background:var(--surface); border:1px solid var(--border); border-radius:12px;
     padding:12px 15px; display:flex; align-items:center; justify-content:space-between; gap:10px;
-    animation:fadeUp .35s ease both;
+    animation:fadeUp .3s ease both;
   }
   .history-name { font-family:'Syne',sans-serif; font-size:13px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .history-meta { font-size:11px; color:var(--muted); margin-top:2px; }
@@ -79,36 +79,49 @@
   .method-tab {
     padding:10px 8px; border:1px solid var(--border); border-radius:10px;
     background:rgba(79,195,247,.05); cursor:pointer; text-align:center;
-    font-size:12px; color:var(--muted); transition:all .2s;
+    font-size:12px; color:var(--muted); transition:all .2s; user-select:none;
   }
   .method-tab.active { border-color:rgba(79,195,247,.5); color:var(--blue); background:rgba(79,195,247,.1); }
   .method-tab-icon { font-size:20px; display:block; margin-bottom:4px; }
 
   .pkg-btn {
     background:rgba(79,195,247,.05); border:1px solid var(--border); border-radius:10px;
-    padding:13px 15px; cursor:pointer; transition:border-color .2s, background .2s;
-    display:flex; align-items:center; justify-content:space-between;
+    padding:13px 15px; cursor:pointer; transition:border-color .2s, background .2s, opacity .2s;
+    display:flex; align-items:center; justify-content:space-between; user-select:none;
   }
   .pkg-btn:active { border-color:rgba(79,195,247,.45); background:rgba(79,195,247,.1); }
+  .pkg-btn.loading { opacity:.5; pointer-events:none; }
   .pkg-name  { font-family:'Syne',sans-serif; font-size:13px; font-weight:600; }
   .pkg-coins { font-size:11px; color:var(--muted); margin-top:2px; }
   .pkg-price { font-family:'Bebas Neue',sans-serif; font-size:17px; color:var(--blue); letter-spacing:.05em; }
 
+  /* Toast */
+  .toast {
+    position:fixed; bottom:80px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:rgba(7,18,46,.95); border:1px solid var(--border); border-radius:10px;
+    padding:10px 18px; font-size:13px; color:var(--text); z-index:100;
+    opacity:0; transition:opacity .25s, transform .25s; pointer-events:none; white-space:nowrap;
+  }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+  .toast.success { border-color:rgba(38,198,218,.4); color:#80deea; }
+  .toast.error   { border-color:rgba(239,83,80,.4); color:#ef9a9a; }
+
   /* Empty / spinner */
   .empty { text-align:center; padding:36px 16px; color:var(--muted); font-size:13px; }
   .empty-icon { font-size:34px; margin-bottom:8px; }
-  .spinner { width:22px; height:22px; border:2px solid rgba(79,195,247,.2); border-top-color:var(--blue); border-radius:50%; animation:spin .7s linear infinite; margin:0 auto 10px; }
+  .spinner-lg { width:24px; height:24px; border:2px solid rgba(79,195,247,.2); border-top-color:var(--blue); border-radius:50%; animation:spin .7s linear infinite; margin:0 auto 10px; }
+  .spinner-sm { display:inline-block; width:13px; height:13px; border:2px solid rgba(79,195,247,.3); border-top-color:var(--blue); border-radius:50%; animation:spin .7s linear infinite; vertical-align:middle; }
 
   /* Nav */
   nav {
     display:grid; grid-template-columns:1fr 1fr;
     border-top:1px solid var(--border);
-    background:rgba(3,7,30,.88); backdrop-filter:blur(12px);
-    position:sticky; bottom:0; z-index:10;
+    background:rgba(3,7,30,.92); backdrop-filter:blur(12px);
+    position:fixed; bottom:0; left:0; right:0; z-index:10;
   }
   .nav-btn {
     display:flex; flex-direction:column; align-items:center; justify-content:center;
-    gap:3px; padding:11px 0 13px; background:none; border:none; color:var(--muted);
+    gap:3px; padding:11px 0 14px; background:none; border:none; color:var(--muted);
     font-family:'DM Mono',monospace; font-size:10px; cursor:pointer; transition:color .2s; position:relative;
   }
   .nav-btn.active { color:var(--blue); }
@@ -126,6 +139,8 @@
 </head>
 <body>
 <canvas id="canvas"></canvas>
+<div class="toast" id="toast"></div>
+
 <div class="app">
   <header>
     <div>
@@ -136,15 +151,15 @@
   </header>
 
   <main>
-    <!-- History tab -->
+    <!-- History -->
     <div class="tab active" id="tab-history">
       <div class="section-label">История генераций</div>
       <div class="history-list" id="history-list">
-        <div class="empty"><div class="spinner"></div>Загрузка…</div>
+        <div class="empty"><div class="spinner-lg"></div>Загрузка…</div>
       </div>
     </div>
 
-    <!-- Profile tab -->
+    <!-- Profile -->
     <div class="tab" id="tab-profile">
       <div class="section-label">Профиль</div>
       <div class="card">
@@ -206,11 +221,22 @@ const PACKAGES = [
 let currentMethod = 'crypto';
 
 // ── API ───────────────────────────────────────────────────────────────
-async function apiFetch(path) {
+async function apiFetch(path, opts = {}) {
   const sep = path.includes('?') ? '&' : '?';
-  const r = await fetch(`${API_BASE}${path}${sep}init_data=${encodeURIComponent(initData)}`);
+  const url = `${API_BASE}${path}${sep}init_data=${encodeURIComponent(initData)}`;
+  const r = await fetch(url, opts);
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
   return r.json();
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.className = 'toast'; }, 3000);
 }
 
 // ── Particles ─────────────────────────────────────────────────────────
@@ -245,7 +271,7 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
   });
 });
 
-// ── Top-up ────────────────────────────────────────────────────────────
+// ── Method selector ───────────────────────────────────────────────────
 function selectMethod(method) {
   currentMethod = method;
   document.querySelectorAll('.method-tab').forEach(t => t.classList.toggle('active', t.dataset.method === method));
@@ -255,26 +281,58 @@ function selectMethod(method) {
 function renderPackages() {
   document.getElementById('packages-list').innerHTML = PACKAGES.map(pkg => {
     const price = currentMethod === 'crypto' ? `${pkg.usdt} USDT` : `${pkg.stars} ⭐`;
-    return `<div class="pkg-btn" onclick="buyPackage('${pkg.id}')">
+    return `<div class="pkg-btn" id="pkg-${pkg.id}" onclick="buyPackage('${pkg.id}')">
       <div>
         <div class="pkg-name">${pkg.name}</div>
         <div class="pkg-coins">💎 ${pkg.coins} монет</div>
       </div>
-      <div class="pkg-price">${price}</div>
+      <div class="pkg-price" id="pkg-price-${pkg.id}">${price}</div>
     </div>`;
   }).join('');
 }
 
-function buyPackage(pid) {
+// ── Buy package ───────────────────────────────────────────────────────
+async function buyPackage(pid) {
   tg?.HapticFeedback?.selectionChanged();
-  tg?.sendData(JSON.stringify({ action:'topup', method:currentMethod, package:pid }));
-  tg?.close();
+  const btn = document.getElementById(`pkg-${pid}`);
+  const priceEl = document.getElementById(`pkg-price-${pid}`);
+  const origPrice = priceEl.innerHTML;
+
+  btn.classList.add('loading');
+  priceEl.innerHTML = '<span class="spinner-sm"></span>';
+
+  if (currentMethod === 'stars') {
+    // Stars: sendData closes the app, bot sends invoice to chat
+    tg?.sendData(JSON.stringify({ action:'topup', method:'stars', package:pid }));
+    return; // app will close automatically
+  }
+
+  // Crypto: call API, get payment URL, open without closing app
+  try {
+    const data = await apiFetch('/api/topup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ method: 'crypto', package: pid }),
+    });
+
+    if (data.url) {
+      tg?.openLink(data.url);
+      showToast('✅ Счёт создан — оплати в CryptoBot', 'success');
+    } else {
+      showToast('❌ Ошибка создания счёта', 'error');
+    }
+  } catch(e) {
+    showToast('❌ Ошибка: ' + e.message, 'error');
+  } finally {
+    btn.classList.remove('loading');
+    priceEl.innerHTML = origPrice;
+  }
 }
 
 // ── History ───────────────────────────────────────────────────────────
 async function loadHistory() {
   const list = document.getElementById('history-list');
-  list.innerHTML = '<div class="empty"><div class="spinner"></div>Загрузка…</div>';
+  list.innerHTML = '<div class="empty"><div class="spinner-lg"></div>Загрузка…</div>';
   try {
     const data = await apiFetch('/api/history');
     if (!data.items?.length) {
