@@ -74,6 +74,19 @@
   .stat-label { font-size:10px; color:var(--muted); letter-spacing:.08em; text-transform:uppercase; }
   .stat-value { font-family:'Bebas Neue',sans-serif; font-size:22px; color:var(--blue); letter-spacing:.05em; margin-top:1px; }
 
+  /* Referral */
+  .ref-link-box {
+    background:rgba(79,195,247,.05); border:1px solid var(--border); border-radius:10px;
+    padding:11px 13px; display:flex; align-items:center; justify-content:space-between; gap:8px;
+  }
+  .ref-link-text { font-size:11px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
+  .copy-btn {
+    background:rgba(79,195,247,.12); border:1px solid var(--border); border-radius:7px;
+    padding:5px 10px; font-size:11px; color:var(--blue); cursor:pointer; flex-shrink:0;
+    transition:background .2s;
+  }
+  .copy-btn:active { background:rgba(79,195,247,.25); }
+
   /* Top-up */
   .method-tabs { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
   .method-tab {
@@ -86,7 +99,7 @@
 
   .pkg-btn {
     background:rgba(79,195,247,.05); border:1px solid var(--border); border-radius:10px;
-    padding:13px 15px; cursor:pointer; transition:border-color .2s, background .2s, opacity .2s;
+    padding:13px 15px; cursor:pointer; transition:border-color .2s, background .2s;
     display:flex; align-items:center; justify-content:space-between; user-select:none;
   }
   .pkg-btn:active { border-color:rgba(79,195,247,.45); background:rgba(79,195,247,.1); }
@@ -94,6 +107,14 @@
   .pkg-name  { font-family:'Syne',sans-serif; font-size:13px; font-weight:600; }
   .pkg-coins { font-size:11px; color:var(--muted); margin-top:2px; }
   .pkg-price { font-family:'Bebas Neue',sans-serif; font-size:17px; color:var(--blue); letter-spacing:.05em; }
+
+  /* Stars note */
+  .stars-note {
+    font-size:11px; color:var(--muted); padding:8px 12px;
+    background:rgba(79,195,247,.04); border:1px solid var(--border); border-radius:8px;
+    display:none;
+  }
+  .stars-note.visible { display:block; }
 
   /* Toast */
   .toast {
@@ -177,7 +198,20 @@
           <div class="stat-box"><div class="stat-label">Баланс</div><div class="stat-value" id="stat-balance">—</div></div>
           <div class="stat-box"><div class="stat-label">Генераций</div><div class="stat-value" id="stat-gens">—</div></div>
           <div class="stat-box"><div class="stat-label">Потрачено</div><div class="stat-value" id="stat-spent">—</div></div>
-          <div class="stat-box"><div class="stat-label">Статус</div><div class="stat-value" style="font-size:13px;padding-top:5px" id="stat-status">—</div></div>
+          <div class="stat-box"><div class="stat-label">Рефералов</div><div class="stat-value" id="stat-refs">—</div></div>
+        </div>
+      </div>
+
+      <div class="section-label">Реферальная программа</div>
+      <div class="card">
+        <div style="font-size:12px;color:var(--muted);">За каждого приглашённого — <b style="color:var(--blue)">5 монет</b></div>
+        <div class="ref-link-box">
+          <span class="ref-link-text" id="ref-link">Загрузка…</span>
+          <button class="copy-btn" onclick="copyRef()">Копировать</button>
+        </div>
+        <div style="display:flex;gap:9px;">
+          <div class="stat-box" style="flex:1"><div class="stat-label">Приглашено</div><div class="stat-value" id="stat-ref-count">—</div></div>
+          <div class="stat-box" style="flex:1"><div class="stat-label">Заработано</div><div class="stat-value" id="stat-ref-earned">—</div></div>
         </div>
       </div>
 
@@ -190,6 +224,9 @@
           <div class="method-tab" data-method="stars" onclick="selectMethod('stars')">
             <span class="method-tab-icon">⭐</span>Stars
           </div>
+        </div>
+        <div class="stars-note" id="stars-note">
+          ⭐ При оплате через Stars мини-апп закроется и счёт придёт в чат с ботом.
         </div>
         <div id="packages-list" style="display:flex;flex-direction:column;gap:8px;"></div>
       </div>
@@ -219,6 +256,7 @@ const PACKAGES = [
   { id:'premium',  name:'Премиум',     coins:1000, usdt:7, stars:700 },
 ];
 let currentMethod = 'crypto';
+let refLink = '';
 
 // ── API ───────────────────────────────────────────────────────────────
 async function apiFetch(path, opts = {}) {
@@ -237,6 +275,24 @@ function showToast(msg, type = '') {
   t.className = 'toast show ' + type;
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => { t.className = 'toast'; }, 3000);
+}
+
+// ── Copy referral link ────────────────────────────────────────────────
+function copyRef() {
+  if (!refLink) return;
+  navigator.clipboard?.writeText(refLink).then(() => {
+    showToast('✅ Ссылка скопирована!', 'success');
+    tg?.HapticFeedback?.notificationOccurred('success');
+  }).catch(() => {
+    // Fallback
+    const el = document.createElement('textarea');
+    el.value = refLink;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    showToast('✅ Ссылка скопирована!', 'success');
+  });
 }
 
 // ── Particles ─────────────────────────────────────────────────────────
@@ -275,6 +331,7 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
 function selectMethod(method) {
   currentMethod = method;
   document.querySelectorAll('.method-tab').forEach(t => t.classList.toggle('active', t.dataset.method === method));
+  document.getElementById('stars-note').classList.toggle('visible', method === 'stars');
   renderPackages();
 }
 
@@ -294,27 +351,30 @@ function renderPackages() {
 // ── Buy package ───────────────────────────────────────────────────────
 async function buyPackage(pid) {
   tg?.HapticFeedback?.selectionChanged();
-  const btn = document.getElementById(`pkg-${pid}`);
+
+  if (currentMethod === 'stars') {
+    // sendData closes the app → bot sends invoice to chat
+    if (tg?.sendData) {
+      tg.sendData(JSON.stringify({ action:'topup', method:'stars', package:pid }));
+    } else {
+      showToast('⚠️ Откройте через Telegram', 'error');
+    }
+    return;
+  }
+
+  // Crypto: call API, get URL, open without closing app
+  const btn     = document.getElementById(`pkg-${pid}`);
   const priceEl = document.getElementById(`pkg-price-${pid}`);
   const origPrice = priceEl.innerHTML;
-
   btn.classList.add('loading');
   priceEl.innerHTML = '<span class="spinner-sm"></span>';
 
-  if (currentMethod === 'stars') {
-    // Stars: sendData closes the app, bot sends invoice to chat
-    tg?.sendData(JSON.stringify({ action:'topup', method:'stars', package:pid }));
-    return; // app will close automatically
-  }
-
-  // Crypto: call API, get payment URL, open without closing app
   try {
     const data = await apiFetch('/api/topup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ method: 'crypto', package: pid }),
     });
-
     if (data.url) {
       tg?.openLink(data.url);
       showToast('✅ Счёт создан — оплати в CryptoBot', 'success');
@@ -365,8 +425,13 @@ async function loadProfile() {
     document.getElementById('stat-balance').textContent = data.balance;
     document.getElementById('stat-gens').textContent    = data.total_gens;
     document.getElementById('stat-spent').textContent   = data.total_spent;
-    document.getElementById('stat-status').textContent  = data.is_banned ? '🚫 Забанен' : '✅ Активен';
+    document.getElementById('stat-refs').textContent    = data.ref_count;
+    document.getElementById('stat-ref-count').textContent  = data.ref_count;
+    document.getElementById('stat-ref-earned').textContent = data.ref_earned + '🪙';
     document.getElementById('balance-val').textContent  = data.balance;
+
+    refLink = data.ref_link || '';
+    document.getElementById('ref-link').textContent = refLink;
 
     const img = document.getElementById('avatar-img');
     img.src = `${API_BASE}/api/avatar?init_data=${encodeURIComponent(initData)}`;
@@ -375,7 +440,6 @@ async function loadProfile() {
   } catch(e) {
     document.getElementById('profile-name').textContent = tgUser.first_name || 'User';
     document.getElementById('profile-id').textContent   = 'ID: ' + (tgUser.id||'—');
-    document.getElementById('stat-status').textContent  = '⚠️ Нет API';
   }
 }
 
