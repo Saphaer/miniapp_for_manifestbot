@@ -352,15 +352,27 @@ function renderPackages() {
 async function buyPackage(pid) {
   tg?.HapticFeedback?.selectionChanged();
 
-  if (currentMethod === 'stars') {
-    // sendData closes the app → bot sends invoice to chat
-    if (tg?.sendData) {
-      tg.sendData(JSON.stringify({ action:'topup', method:'stars', package:pid }));
-    } else {
-      showToast('⚠️ Откройте через Telegram', 'error');
+if (currentMethod === 'stars') {
+    const btn = document.getElementById(`pkg-${pid}`);
+    const priceEl = document.getElementById(`pkg-price-${pid}`);
+    const origPrice = priceEl.innerHTML;
+    btn.classList.add('loading');
+    priceEl.innerHTML = '<span class="spinner-sm"></span>';
+    try {
+        await apiFetch('/api/topup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ method: 'stars', package: pid }),
+        });
+        showToast('⭐ Счёт отправлен в чат с ботом', 'success');
+    } catch(e) {
+        showToast('❌ Ошибка: ' + e.message, 'error');
+    } finally {
+        btn.classList.remove('loading');
+        priceEl.innerHTML = origPrice;
     }
     return;
-  }
+}
 
   // Crypto: call API, get URL, open without closing app
   const btn     = document.getElementById(`pkg-${pid}`);
